@@ -1,0 +1,64 @@
+{% if errors is defined %}
+    {% for err_message in errors %}
+        <div class="alert alert-danger alert-dismissible"><i class="fa fa-exclamation-circle"></i>
+            {{ err_message }}
+        </div>
+    {% endfor %}
+{% else %}
+    {% if page_layout != 'onepage' %}
+        <script src="https://app.coinpays.io/assets/js/iframeResizer.min.js"></script>
+        <iframe src="https://app.coinpays.io/payment/{{ iframe_token }}" id="coinpaysiframe" frameborder="0"
+                scrolling="no" style="width: 100%; height: calc(100vh - 100px)"></iframe>
+        <script type="text/javascript">
+            setInterval(function () {
+                iFrameResize({}, '#coinpaysiframe');
+            }, 1000);
+        </script>
+
+        <style>
+            /* journal popup resize // onepage with standard option */
+
+            .popup-checkout-payment .popup-inner-body{
+                max-height: inherit!important;
+                max-width: 100%!important;
+                width: 1024px!important;
+            }
+
+        </style>
+
+    {% else %}
+
+        <style>
+            .quick-checkout-wrapper .payment-coinpays_checkout {
+                display: none;
+            }
+        </style>
+
+        <div class="buttons">
+            <div class="pull-right">
+                <input type="button" value="{{ button_confirm }}" id="button-confirm"
+                       data-loading-text="{{ text_loading }}" class="btn btn-primary"/>
+            </div>
+        </div>
+
+        <script type="text/javascript">
+            $(document).ready(function () {
+                $('#button-confirm').click(function () {
+                    $.ajax({
+                        'url': 'index.php?route=extension/payment/coinpays_checkout/onepage',
+                        'dataType': 'json',
+                        'type': 'post',
+                        success: function (json) {
+                            if (json.status == 'success') {
+                                window.location.href = 'index.php?route=extension/payment/coinpays_checkout/form';
+                            }
+                        },
+                        error: function (xhr, ajaxOptions, thrownError) {
+                            alert(thrownError + "\r\n" + xhr.statusText + "\r\n" + xhr.responseText);
+                        }
+                    });
+                })
+            });
+        </script>
+    {% endif %}
+{% endif %}
